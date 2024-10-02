@@ -1,0 +1,113 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" GroupingSetting="Access" MembersFormat="FullSignature">
+  <Class Name="Stend.Algorithm" Collapsed="true">
+    <Position X="19.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAQAAAAAAAAAAAAAAAgAAAAAIAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.BubbleSort">
+    <Position X="15.25" Y="2.5" Width="1.25" />
+    <Members>
+      <Method Name="Run" Hidden="true" />
+      <Method Name="Swap" Hidden="true" />
+    </Members>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.QuickSort" Collapsed="true">
+    <Position X="19.75" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAQAAAAAABAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.SumCalculator" Collapsed="true">
+    <Position X="24.25" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.PolynomialEvaluator" Collapsed="true">
+    <Position X="12.25" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.ConstantFunction" Collapsed="true">
+    <Position X="16.75" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.ProductCalculator" Collapsed="true">
+    <Position X="21.25" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.TimSort" Collapsed="true">
+    <Position X="25.75" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>EAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.MatrixMultiplication" Collapsed="true">
+    <Position X="13.75" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.PowerAlgorithms" Collapsed="true">
+    <Position X="18.25" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAACAAAAQABAAAAAAAAAIAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.BucketSort" Collapsed="true">
+    <Position X="22.75" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.SelectionSort" Collapsed="true">
+    <Position X="27.25" Y="2.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>Alghorithms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.Form1" Collapsed="true">
+    <Position X="13.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAQAACAgABEQAACACAACAABQAAAAADQAAAAIAAA=</HashCode>
+      <FileName>Form1.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.Form2" Collapsed="true">
+    <Position X="15.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAQCAAAAAAAACAQACCCAAIEAAAAGBQAAgAAAA=</HashCode>
+      <FileName>Form2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stend.Program" Collapsed="true">
+    <Position X="17.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

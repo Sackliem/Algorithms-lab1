@@ -1,0 +1,55 @@
+C:\Users\gorya\source\repos\Stend\Stend\bin\Debug\Stend.exe.config
+C:\Users\gorya\source\repos\Stend\Stend\bin\Debug\Stend.exe
+C:\Users\gorya\source\repos\Stend\Stend\bin\Debug\Stend.pdb
+C:\Users\gorya\source\repos\Stend\Stend\obj\Debug\Stend.csproj.AssemblyReference.cache
+C:\Users\gorya\source\repos\Stend\Stend\obj\Debug\Stend.Form1.resources
+C:\Users\gorya\source\repos\Stend\Stend\obj\Debug\Stend.Properties.Resources.resources
+C:\Users\gorya\source\repos\Stend\Stend\obj\Debug\Stend.csproj.GenerateResource.cache
+C:\Users\gorya\source\repos\Stend\Stend\obj\Debug\Stend.csproj.CoreCompileInputs.cache
+C:\Users\gorya\source\repos\Stend\Stend\obj\Debug\Stend.exe
+C:\Users\gorya\source\repos\Stend\Stend\obj\Debug\Stend.pdb
+C:\Users\gorya\source\repos\Stend\Stend\obj\Debug\Stend.Form2.resources
+D:\IIT\algorithms\dev\Stend\Stend\bin\Debug\Stend.exe.config
+D:\IIT\algorithms\dev\Stend\Stend\bin\Debug\Stend.exe
+D:\IIT\algorithms\dev\Stend\Stend\bin\Debug\Stend.pdb
+D:\IIT\algorithms\dev\Stend\Stend\obj\Debug\Stend.csproj.AssemblyReference.cache
+D:\IIT\algorithms\dev\Stend\Stend\obj\Debug\Stend.Form1.resources
+D:\IIT\algorithms\dev\Stend\Stend\obj\Debug\Stend.Properties.Resources.resources
+D:\IIT\algorithms\dev\Stend\Stend\obj\Debug\Stend.csproj.GenerateResource.cache
+D:\IIT\algorithms\dev\Stend\Stend\obj\Debug\Stend.csproj.CoreCompileInputs.cache
+D:\IIT\algorithms\dev\Stend\Stend\obj\Debug\Stend.exe
+D:\IIT\algorithms\dev\Stend\Stend\obj\Debug\Stend.pdb
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\bin\Debug\Stend.exe.config
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\bin\Debug\Stend.exe
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\bin\Debug\Stend.pdb
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\obj\Debug\Stend.csproj.AssemblyReference.cache
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\obj\Debug\Stend.Form1.resources
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\obj\Debug\Stend.Properties.Resources.resources
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\obj\Debug\Stend.csproj.GenerateResource.cache
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\obj\Debug\Stend.csproj.CoreCompileInputs.cache
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\obj\Debug\Stend.exe
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\obj\Debug\Stend.pdb
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Stend\Stend\obj\Debug\Stend.Form2.resources
+D:\IIT\algorithms\dev\Stend\Stend\obj\Debug\Stend.Form2.resources
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\bin\Debug\Stend.exe.config
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\bin\Debug\Stend.exe
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\bin\Debug\Stend.pdb
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\obj\Debug\Stend.csproj.AssemblyReference.cache
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\obj\Debug\Stend.Form1.resources
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\obj\Debug\Stend.Form2.resources
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\obj\Debug\Stend.Properties.Resources.resources
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\obj\Debug\Stend.csproj.GenerateResource.cache
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\obj\Debug\Stend.csproj.CoreCompileInputs.cache
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\obj\Debug\Stend.exe
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\Новая папка\Stend\Stend\obj\Debug\Stend.pdb
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\bin\Debug\Stend.exe.config
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\bin\Debug\Stend.exe
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\bin\Debug\Stend.pdb
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.csproj.AssemblyReference.cache
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.Form1.resources
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.Form2.resources
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.Properties.Resources.resources
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.csproj.GenerateResource.cache
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.csproj.CoreCompileInputs.cache
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.exe
+C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.pdb
