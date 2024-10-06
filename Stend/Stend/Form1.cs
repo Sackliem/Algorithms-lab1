@@ -26,8 +26,30 @@ namespace Stend
 
         private void button2_Click(object sender, EventArgs e)
         {
+            //TODO:
+            // переписать под многпоточность как нибудь
+            if (textBox1.Text.Length == 0)
+            {
+                MessageBox.Show("Напишиете размер массива");
+                return;
+            }
+            if (textBox3.Text.Length == 0)
+            {
+                MessageBox.Show("Напишиете размер подмассива");
+                return;
+            }
+            if (comboBox1.Text.Length == 0)
+            {
+                MessageBox.Show("Выбери алгоритм");
+                return;
+            }
+            if (comboBox2.Text.Length == 0)
+            {
+                MessageBox.Show("Выбери размерность времени");
+                return;
+            }
             Form2 form2 = new Form2(this);
-            form2.ShowDialog();
+            Task.Run(() => form2.ShowDialog());  
         }
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
@@ -61,6 +83,26 @@ namespace Stend
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }

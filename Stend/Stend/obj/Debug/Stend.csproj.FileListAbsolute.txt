@@ -53,3 +53,15 @@ C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\
 C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.csproj.CoreCompileInputs.cache
 C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.exe
 C:\Users\gorya\Desktop\Work_VZ\Cложность алгоритмов\New\Stend\Stend\obj\Debug\Stend.pdb
+E:\repository\iit\algorithms\dev\Stend\Stend\bin\Debug\Stend.exe.config
+E:\repository\iit\algorithms\dev\Stend\Stend\bin\Debug\Stend.exe
+E:\repository\iit\algorithms\dev\Stend\Stend\bin\Debug\Stend.pdb
+E:\repository\iit\algorithms\dev\Stend\Stend\obj\Debug\Stend.csproj.AssemblyReference.cache
+E:\repository\iit\algorithms\dev\Stend\Stend\obj\Debug\Stend.csproj.SuggestedBindingRedirects.cache
+E:\repository\iit\algorithms\dev\Stend\Stend\obj\Debug\Stend.Form1.resources
+E:\repository\iit\algorithms\dev\Stend\Stend\obj\Debug\Stend.Form2.resources
+E:\repository\iit\algorithms\dev\Stend\Stend\obj\Debug\Stend.Properties.Resources.resources
+E:\repository\iit\algorithms\dev\Stend\Stend\obj\Debug\Stend.csproj.GenerateResource.cache
+E:\repository\iit\algorithms\dev\Stend\Stend\obj\Debug\Stend.csproj.CoreCompileInputs.cache
+E:\repository\iit\algorithms\dev\Stend\Stend\obj\Debug\Stend.exe
+E:\repository\iit\algorithms\dev\Stend\Stend\obj\Debug\Stend.pdb

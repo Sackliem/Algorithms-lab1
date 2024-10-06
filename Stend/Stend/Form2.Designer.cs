@@ -36,6 +36,7 @@
             this.button1 = new System.Windows.Forms.Button();
             this.openfile = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.graph)).BeginInit();
             this.SuspendLayout();
             // 
@@ -54,7 +55,7 @@
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this.graph.Series.Add(series1);
-            this.graph.Size = new System.Drawing.Size(649, 493);
+            this.graph.Size = new System.Drawing.Size(1078, 674);
             this.graph.TabIndex = 0;
             this.graph.Text = "chart1";
             title1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
@@ -65,9 +66,9 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(667, 12);
+            this.button1.Location = new System.Drawing.Point(12, 716);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(108, 39);
+            this.button1.Size = new System.Drawing.Size(1078, 39);
             this.button1.TabIndex = 1;
             this.button1.Text = "Построить";
             this.button1.UseVisualStyleBackColor = true;
@@ -75,7 +76,7 @@
             // 
             // openfile
             // 
-            this.openfile.Location = new System.Drawing.Point(667, 57);
+            this.openfile.Location = new System.Drawing.Point(802, 152);
             this.openfile.Name = "openfile";
             this.openfile.Size = new System.Drawing.Size(108, 37);
             this.openfile.TabIndex = 2;
@@ -87,15 +88,25 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(11, 691);
+            this.progressBar1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(1079, 20);
+            this.progressBar1.TabIndex = 3;
+            this.progressBar1.Click += new System.EventHandler(this.progressBar1_Click);
+            // 
             // Form2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DarkSlateBlue;
-            this.ClientSize = new System.Drawing.Size(787, 517);
-            this.Controls.Add(this.openfile);
+            this.ClientSize = new System.Drawing.Size(1102, 767);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.graph);
+            this.Controls.Add(this.openfile);
             this.Name = "Form2";
             this.Text = "Form2";
             this.Load += new System.EventHandler(this.Form2_Load);
@@ -110,5 +121,6 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button openfile;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.ProgressBar progressBar1;
     }
 }

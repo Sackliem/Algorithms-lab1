@@ -1,35 +1,74 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.Xml.Linq;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TreeView;
 
 namespace Stend
 {
-    public abstract class Algorithm
+    public abstract class Algorithm : IDisposable
     {
         protected double[] Times;
-        protected List<double[]> Arr;
+        protected double times_formule;
+        protected List<int[]> Arr;
+        protected string name;
+        protected string time_select;
+        protected int block_size;
         protected int repeats;
         protected Chart chart;
+        protected ProgressBar progressBar;
+        private bool disposed = false;
 
-        public abstract double[] Run(double[] input);
-        public abstract double[] Run(double[] input, int exponent);
 
-        public static List<double[]> SplitArray(double[] array, int increment)
+        public abstract void Run(int[] input);
+        public abstract int[] Run(int[] input, int exponent);
+
+
+
+        // реализация интерфейса IDisposable.
+        public void Dispose()
         {
-            List<double[]> subarrays = new List<double[]>();
+            // освобождаем неуправляемые ресурсы
+            Dispose(true);
+            // подавляем финализацию
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed) return;
+            if (disposing)
+            {
+                Arr.Clear();
+                Times = new double[0];
+            }
+            // освобождаем неуправляемые объекты
+            disposed = true;
+        }
+
+        ~Algorithm() 
+        { 
+            Dispose(false); 
+        }
+
+        public static List<int[]> SplitArray(int[] array, int increment)
+        {
+            List<int[]> subarrays = new List<int[]>();
             int currentSize = increment;
 
             while (currentSize <= array.Length)
             {
-                double[] subarray = new double[currentSize];
+                int[] subarray = new int[currentSize];
                 Array.Copy(array, 0, subarray, 0, currentSize);
                 subarrays.Add(subarray);
                 currentSize += increment;
@@ -38,7 +77,7 @@ namespace Stend
             // Добавляем последний подмассив, если остались элементы
             if (currentSize - increment < array.Length)
             {
-                double[] lastSubarray = new double[array.Length];
+                int[] lastSubarray = new int[array.Length];
                 Array.Copy(array, 0, lastSubarray, 0, array.Length);
                 subarrays.Add(lastSubarray);
             }
@@ -48,15 +87,24 @@ namespace Stend
 
         public void PlotGraph()
         {
+            Title tt = new Title();
+            tt.Name = name;
+            tt.Text = name;
+            chart.Titles.Add(tt);
+            //chart.Series[0].Label = name;
+            chart.Series[0].Name = name;
+            chart.ChartAreas[0].AxisX.Title = "Lenght";
+            chart.ChartAreas[0].AxisY.Title = time_select;
             chart.Series[0].Points.Clear();
             int numbers_lenght = Arr.Count;
             for (var i = 0; i != numbers_lenght; i++)
             {
+                progressBar.PerformStep();
                 chart.Series[0].Points.AddXY(Arr[i].Length, Times[i]);
             }
         }
 
-        public void PlotGraph_Pow(double[] times, double[] numbers)
+        public void PlotGraph_Pow(int[] times, int[] numbers)
         {
             // надо переписать под возведение в степень
             chart.Series[0].Points.Clear();
@@ -69,66 +117,84 @@ namespace Stend
 
     public class BubbleSort : Algorithm
     {
-        public BubbleSort(int repeat, ref Chart ch)
+        public BubbleSort(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Bubble Sort";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
-        private static void Swap(ref double e1, ref double e2)
+        private static void Swap(ref int e1, ref int e2)
         {
             var temp = e1;
             e1 = e2;
             e2 = temp;
         }
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
-            // Эту хуету не трогать
+            // Эту ху*ту не трогать
             return numbers;
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
-            
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
+            {
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            List<double[]> avg_times = new List<double[]>(); // храним время всех повторений алгритма
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
 
-            //переменная repeats отвечающая за кол-во повторений
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            await Task.Run(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
                 {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    bubblesort(array[i]);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        bubblesort(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
 
-            // вычисление среднего для повторений
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
                 {
-                    tmp += avg_times[i][j];
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
                 }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
 
-            // В Times хранится время для постройки графика
-            Times = processingTimes;
+                Times = processingTimes;
 
-            PlotGraph();
-            return processingTimes;
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
-        private static void bubblesort(double[] numbers)
+
+        private static void bubblesort(int[] numbers)
         {
             var len = numbers.Length;
             for (var i = 0; i < len - 1; i++)
@@ -146,135 +212,196 @@ namespace Stend
 
     public class QuickSort : Algorithm
     {
-        public QuickSort(int repeat, ref Chart ch)
+        public QuickSort(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Quick Sort";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        private static void Swap(ref double a, ref double b)
+        public static void Sort(int[] arr, int left, int right)
         {
-            double temp = a;
-            a = b;
-            b = temp;
+            if (left < right)
+            {
+                int pivot = Partition(arr, left, right);
+
+                Sort(arr, left, pivot - 1);
+                Sort(arr, pivot + 1, right);
+            }
+            System.Console.WriteLine();
         }
 
-        private void QuickSortRecursive(double[] array, int left, int right)
+        private static int Partition(int[] arr, int left, int right)
         {
-            var i = left;
-            var j = right;
-            var pivot = array[left];
-            while (i <= j)
+            // Используем медиану для выбора опорного элемента
+            int middle = left + (right - left) / 2;
+            int pivot = arr[middle];
+            Swap(arr, middle, right);  // Перемещаем опорный элемент в конец
+
+            int i = left - 1;
+            for (int j = left; j < right; j++)
             {
-                while (array[i] < pivot) i++;
-                while (array[j] > pivot) j--;
-                if (i <= j)
+                if (arr[j] <= pivot)
                 {
-                    Swap(ref array[i], ref array[j]);
                     i++;
-                    j--;
+                    Swap(arr, i, j);
                 }
             }
 
-            if (left < j) QuickSortRecursive(array, left, j);
-            if (i < right) QuickSortRecursive(array, i, right);
+            Swap(arr, i + 1, right);  // Перемещаем опорный элемент на своё место
+            return i + 1;
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        private static void Swap(int[] arr, int i, int j)
+        {
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+
+
+        public override int[] Run(int[] numbers, int exponent)
         {
             // Эту хуету не трогать
             return numbers;
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
-            List<double[]> avg_times = new List<double[]>();
+            List<int[]> array = SplitArray(numbers, block_size);
 
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
-                {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    QuickSortRecursive(array[i], 0, array[i].Length - 1);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    tmp += avg_times[i][j];
-                }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            Times = processingTimes;
-            PlotGraph();
-            return processingTimes;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        Sort(array[i], 0, array[i].Length - 1);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
+
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
     }
 
     public class SumCalculator : Algorithm
     {
-        public SumCalculator(int repeat, ref Chart ch)
+        public SumCalculator(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Sum";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
-            List<double[]> avg_times = new List<double[]>();
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
-                {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    Sum(array[i]);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    tmp += avg_times[i][j];
-                }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            Times = processingTimes;
-            PlotGraph();
-            return processingTimes;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        Sum(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
-            // Эту хуету не трогать
+            // Эту хуе*у не трогать
             return numbers;
         }
 
-        public static void Sum(double[] numbers)
+        public static void Sum(int[] numbers)
         {
-            double sum = 0;
+            int sum = 0;
             for (int i = 0; i < numbers.Length; i++)
             {
                 sum += numbers[i];
@@ -286,57 +413,81 @@ namespace Stend
     public class PolynomialEvaluator : Algorithm
     {
 
-        public PolynomialEvaluator(int repeat, ref Chart ch)
+        public PolynomialEvaluator(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Polynom";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
-            // Эту хуету не трогать
+            // Эту хуе*у не трогать
             return numbers;
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
-            List<double[]> avg_times = new List<double[]>();
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
-                {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    Polynomial(array[i]);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    tmp += avg_times[i][j];
-                }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            Times = processingTimes;
-            PlotGraph();
-            return processingTimes;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        Polynomial(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
 
-        public static void Polynomial(double[] coefficients)
+        public static void Polynomial(int[] coefficients)
         {
             double result = 0;
-            double x = 2.0;  // Примерное значение x
+            double x = 1.5;  // Примерное значение x
             int n = coefficients.Length;
             for (int i = 0; i < n; i++)
             {
@@ -352,57 +503,81 @@ namespace Stend
 
     public class ConstantFunction : Algorithm
     {
-        public ConstantFunction(int repeat, ref Chart ch)
+        public ConstantFunction(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Constant";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
-            // Эту хуету не трогать
+            // Эту ху*ту не трогать
             return numbers;
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
-            List<double[]> avg_times = new List<double[]>();
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
-                {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    Constant(array[i]);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    tmp += avg_times[i][j];
-                }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            Times = processingTimes;
-            PlotGraph();
-            return processingTimes;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        Constant(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
 
-        public static void Constant(double[] vector)
+        public static void Constant(int[] vector)
         {
             var zero = 0;
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 zero += i;
             }
@@ -412,54 +587,78 @@ namespace Stend
     public class ProductCalculator : Algorithm
     {
 
-        public ProductCalculator(int repeat, ref Chart ch)
+        public ProductCalculator(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Multiply";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
             // Эту хуету не трогать
             return numbers;
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
-            List<double[]> avg_times = new List<double[]>();
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
-                {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    Product(array[i]);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    tmp += avg_times[i][j];
-                }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            Times = processingTimes;
-            PlotGraph();
-            return processingTimes;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        Product(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
 
-        public static void Product(double[] vector)
+        public static void Product(int[] vector)
         {
             double product = 1;
             for (int i = 0; i < vector.Length; i++)
@@ -472,17 +671,22 @@ namespace Stend
     public class TimSort : Algorithm
     {
 
-        public TimSort(int repeat, ref Chart ch)
+        public TimSort(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Tim Sort";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        private static void InsertionSort(double[] array, int left, int right)
+        private static void InsertionSort(int[] array, int left, int right)
         {
             for (int i = left + 1; i <= right; i++)
             {
-                double temp = array[i];
+                int temp = array[i];
                 int j = i - 1;
                 while (j >= left && array[j] > temp)
                 {
@@ -493,12 +697,12 @@ namespace Stend
             }
         }
 
-        private static void Merge(double[] array, int left, int mid, int right)
+        private static void Merge(int[] array, int left, int mid, int right)
         {
             int len1 = mid - left + 1;
             int len2 = right - mid;
-            double[] leftArray = new double[len1];
-            double[] rightArray = new double[len2];
+            int[] leftArray = new int[len1];
+            int[] rightArray = new int[len2];
 
             Array.Copy(array, left, leftArray, 0, len1);
             Array.Copy(array, mid + 1, rightArray, 0, len2);
@@ -534,7 +738,7 @@ namespace Stend
             }
         }
 
-        public static void timsort(double[] array)
+        public static void timsort(int[] array)
         {
             int minRun = 32; // Можно задать любой размер блока
             int n = array.Length;
@@ -558,42 +762,61 @@ namespace Stend
             };
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
-            List<double[]> avg_times = new List<double[]>();
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
-                {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    timsort(array[i]);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    tmp += avg_times[i][j];
-                }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            Times = processingTimes;
-            PlotGraph();
-            return processingTimes;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        timsort(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
             // Эту хуету не трогать
             return numbers;
@@ -603,24 +826,29 @@ namespace Stend
     public class MatrixMultiplication : Algorithm
     {
 
-        public MatrixMultiplication(int repeat, ref Chart ch)
+        public MatrixMultiplication(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Matrix Multiplication";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        public static void matrixmult(double[] input)
+        public static void matrixmult(int[] input)
         {
             // input будет содержать одномерный массив для представления матриц
             int size = (int)Math.Sqrt(input.Length / 2);  // Определяем размер матриц
-            double[,] matrixA = new double[size, size];
-            double[,] matrixB = new double[size, size];
+            int[,] matrixA = new int[size, size];
+            int[,] matrixB = new int[size, size];
 
             // Заполнение матриц значениями из входного массива
-            Buffer.BlockCopy(input, 0, matrixA, 0, size * size * sizeof(double));
-            Buffer.BlockCopy(input, size * size * sizeof(double), matrixB, 0, size * size * sizeof(double));
+            Buffer.BlockCopy(input, 0, matrixA, 0, size * size * sizeof(int));
+            Buffer.BlockCopy(input, size * size * sizeof(int), matrixB, 0, size * size * sizeof(int));
 
-            double[,] result = new double[size, size];
+            int[,] result = new int[size, size];
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
@@ -634,43 +862,61 @@ namespace Stend
             }
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
-
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
-            List<double[]> avg_times = new List<double[]>();
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
-                {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    matrixmult(array[i]);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    tmp += avg_times[i][j];
-                }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            Times = processingTimes;
-            PlotGraph();
-            return processingTimes;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        matrixmult(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
             // Эту хуету не трогать
             return numbers;
@@ -680,57 +926,77 @@ namespace Stend
     public class PowerNative : Algorithm
     {
 
-        public PowerNative(int repeat, ref Chart ch)
+        public PowerNative(int repeat, ref Chart ch, ref ProgressBar progressBar1)
         {
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        private static double power_naive(double baseNumber, int exponent)
+        private static int power_naive(int baseNumber, int exponent)
         {
-            double result = 1;
-            double times = 0;
+            int result = 1;
+            int times = 0;
             for (int i = 0; i < exponent; i++)
             {
-                times++;
                 result *= baseNumber;
                 times++;
             }
             return times;
         }
 
-        public override double[] Run(double[] input)
+        public override void Run(int[] input)
         {
-            // Эту хуету не трогать
-            return input;
+            // Эту хуе*у не трогать
         }
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
             var len = numbers.Length;
             Array.Sort(numbers);
-            List<double[]> avg_times = new List<double[]>();
+            List<int[]> avg_steps = new List<int[]>();  // Список для хранения количества шагов для каждого повторения
+
+            // Настраиваем прогресс-бар
+            progressBar.Invoke((Action)(() =>
+            {
+                progressBar.Visible = true;
+                progressBar.Maximum = len * repeats;  // Общий прогресс — количество чисел * количество повторений
+                progressBar.Value = 0;
+            }));
+
+            // Многопоточный расчет с использованием Parallel.For
             for (int avg_i = 0; avg_i < repeats; avg_i++)
             {
-                double[] times_for_avg = new double[numbers.Length];
-                for (int i = 0; i < len; i++)
+                int[] steps_for_avg = new int[numbers.Length];
+
+                Parallel.For(0, len, i =>
                 {
-                    times_for_avg[i] = power_naive(exponent, (int)numbers[i]);
-                }
-                avg_times.Add(times_for_avg);
+                    steps_for_avg[i] = power_naive(exponent, numbers[i]);  // Подсчет шагов для каждого числа
+
+                    // Обновляем прогресс-бар после выполнения каждого элемента
+                    progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                });
+
+                avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
             }
-            double[] processingTimes = new double[numbers.Length];
-            for (int j = 0; j < numbers.Length; j++)
+
+            // Вычисляем среднее количество шагов для каждого числа
+            int[] processingSteps = new int[numbers.Length];
+            Parallel.For(0, len, j =>
             {
-                double tmp = 0;
+                int totalSteps = 0;
                 for (int i = 0; i < repeats; i++)
                 {
-                    tmp += avg_times[i][j];
+                    totalSteps += avg_steps[i][j];
                 }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
-            PlotGraph_Pow(processingTimes, numbers);
-            return processingTimes;
+
+                int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
+                processingSteps[j] = avg;
+            });
+
+            // Строим график с количеством шагов
+            PlotGraph_Pow(processingSteps, numbers);
+
+            return numbers;
         }
 
     }
@@ -738,8 +1004,9 @@ namespace Stend
     public class PowerRecursive : Algorithm
     {
 
-        public PowerRecursive(int repeat, ref Chart ch)
+        public PowerRecursive(int repeat, ref Chart ch, ref ProgressBar progressBar1)
         {
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
@@ -750,58 +1017,78 @@ namespace Stend
 
             if (exponent == 0)
                 return 1;
-            actionCount += 2;
             return baseNumber * power_recursive(baseNumber, exponent - 1, ref actionCount);
         }
 
-        public override double[] Run(double[] exponents, int number)
+        public override int[] Run(int[] numbers, int exponent)
         {
-            int actionCount = 0; // Переменная для подсчета действий
-            var len = exponents.Length;
-            Array.Sort(exponents);
-            List<double[]> avg_times = new List<double[]>();
+            var len = numbers.Length;
+            Array.Sort(numbers);
+            List<int[]> avg_steps = new List<int[]>();  // Список для хранения количества шагов для каждого повторения
+
+            // Настраиваем прогресс-бар
+            progressBar.Invoke((Action)(() =>
+            {
+                progressBar.Visible = true;
+                progressBar.Maximum = len * repeats;  // Общий прогресс — количество чисел * количество повторений
+                progressBar.Value = 0;
+            }));
+
+            // Многопоточный расчет с использованием Parallel.For
             for (int avg_i = 0; avg_i < repeats; avg_i++)
             {
-                double[] times_for_avg = new double[exponents.Length];
-                for (int i = 0; i < len; i++)
+                int[] steps_for_avg = new int[numbers.Length];
+
+                Parallel.For(0, len, i =>
                 {
-                    power_recursive(number, exponents[i], ref actionCount);
-                    times_for_avg[i] = actionCount;
-                    actionCount = 0;
-                }
-                avg_times.Add(times_for_avg);
+                    int actions = 0;
+                    power_recursive(exponent, numbers[i], ref actions);  // Подсчет шагов для каждого числа
+                    steps_for_avg[i] = actions;
+                    actions = 0;
+
+                    // Обновляем прогресс-бар после выполнения каждого элемента
+                    progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                });
+
+                avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
             }
-            double[] processingTimes = new double[exponents.Length];
-            for (int j = 0; j < exponents.Length; j++)
+
+            // Вычисляем среднее количество шагов для каждого числа
+            int[] processingSteps = new int[numbers.Length];
+            for (int j = 0; j < numbers.Length; j++)
             {
-                double tmp = 0;
+                int totalSteps = 0;
                 for (int i = 0; i < repeats; i++)
                 {
-                    tmp += avg_times[i][j];
+                    totalSteps += avg_steps[i][j];
                 }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
+
+                int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
+                processingSteps[j] = avg;
             }
-            PlotGraph_Pow(processingTimes, exponents);
-            return processingTimes;
+
+            // Строим график с количеством шагов
+            PlotGraph_Pow(processingSteps, numbers);
+
+            return numbers;
         }
 
-        public override double[] Run(double[] input)
+        public override void Run(int[] input)
         {
-            // Эту хуету не трогать
-            return input; 
+            // Эту хуе*у не трогать
         }
     }
 
     public class PowerQuickPow : Algorithm
     {
-        public PowerQuickPow(int repeat, ref Chart ch)
+        public PowerQuickPow(int repeat, ref Chart ch, ref ProgressBar progressBar1)
         {
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        private static double Power_quick_pow(double baseValue, double exponent)
+        private static int Power_quick_pow(int baseValue, int exponent)
         {
             double f;
             double c = baseValue;
@@ -842,87 +1129,129 @@ namespace Stend
             return times;
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
             var len = numbers.Length;
             Array.Sort(numbers);
-            List<double[]> avg_times = new List<double[]>();
+            List<int[]> avg_steps = new List<int[]>();  // Список для хранения количества шагов для каждого повторения
+
+            // Настраиваем прогресс-бар
+            progressBar.Invoke((Action)(() =>
+            {
+                progressBar.Visible = true;
+                progressBar.Maximum = len * repeats;  // Общий прогресс — количество чисел * количество повторений
+                progressBar.Value = 0;
+            }));
+
+            // Многопоточный расчет с использованием Parallel.For
             for (int avg_i = 0; avg_i < repeats; avg_i++)
             {
-                double[] times_for_avg = new double[numbers.Length];
-                for (int i = 0; i < len; i++)
+                int[] steps_for_avg = new int[numbers.Length];
+
+                Parallel.For(0, len, i =>
                 {
-                    times_for_avg[i] = Power_quick_pow(exponent, numbers[i]);
-                }
-                avg_times.Add(times_for_avg);
+                    steps_for_avg[i] = Power_quick_pow(exponent, numbers[i]);  // Подсчет шагов для каждого числа
+
+                    // Обновляем прогресс-бар после выполнения каждого элемента
+                    progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                });
+
+                avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
             }
-            double[] processingTimes = new double[numbers.Length];
-            for (int j = 0; j < numbers.Length; j++)
+
+            // Вычисляем среднее количество шагов для каждого числа
+            int[] processingSteps = new int[numbers.Length];
+            Parallel.For(0, len, j =>
             {
-                double tmp = 0;
+                int totalSteps = 0;
                 for (int i = 0; i < repeats; i++)
                 {
-                    tmp += avg_times[i][j];
+                    totalSteps += avg_steps[i][j];
                 }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
-            PlotGraph_Pow(processingTimes, numbers);
-            return processingTimes;
+
+                int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
+                processingSteps[j] = avg;
+            });
+
+            // Строим график с количеством шагов
+            PlotGraph_Pow(processingSteps, numbers);
+
+            return numbers;
         }
 
-        public override double[] Run(double[] input)
+        public override void Run(int[] input)
         {
-            // Эту хуету не трогать
-            return input;
+            // Эту хуе*у не трогать
         }
 
     }
 
     public class PowerQuickPowClassic : Algorithm
     {
-        public PowerQuickPowClassic(int repeat, ref Chart ch)
+        public PowerQuickPowClassic(int repeat, ref Chart ch, ref ProgressBar progressBar1)
         {
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
             var len = numbers.Length;
             Array.Sort(numbers);
-            List<double[]> avg_times = new List<double[]>();
+            List<int[]> avg_steps = new List<int[]>();  // Список для хранения количества шагов для каждого повторения
+
+            // Настраиваем прогресс-бар
+            progressBar.Invoke((Action)(() =>
+            {
+                progressBar.Visible = true;
+                progressBar.Maximum = len * repeats;  // Общий прогресс — количество чисел * количество повторений
+                progressBar.Value = 0;
+            }));
+
+            // Многопоточный расчет с использованием Parallel.For
             for (int avg_i = 0; avg_i < repeats; avg_i++)
             {
-                double[] times_for_avg = new double[numbers.Length];
-                for (int i = 0; i < len; i++)
+                int[] steps_for_avg = new int[numbers.Length];
+
+                Parallel.For(0, len, i =>
                 {
-                    times_for_avg[i] = Power_quickPowClassic(exponent, numbers[i]);
-                }
-                avg_times.Add(times_for_avg);
+                    steps_for_avg[i] = Power_quickPowClassic(exponent, numbers[i]);  // Подсчет шагов для каждого числа
+
+                    // Обновляем прогресс-бар после выполнения каждого элемента
+                    progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                });
+
+                avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
             }
-            double[] processingTimes = new double[numbers.Length];
-            for (int j = 0; j < numbers.Length; j++)
+
+            // Вычисляем среднее количество шагов для каждого числа
+            int[] processingSteps = new int[numbers.Length];
+
+            Parallel.For(0, len, j =>
             {
-                double tmp = 0;
+                int totalSteps = 0;
                 for (int i = 0; i < repeats; i++)
                 {
-                    tmp += avg_times[i][j];
+                    totalSteps += avg_steps[i][j];
                 }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
-            PlotGraph_Pow(processingTimes, numbers);
-            return processingTimes;
-        }
 
-        public override double[] Run(double[] numbers)
-        {
-            // Эту хуету не трогать
+                int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
+                processingSteps[j] = avg;
+            });
+
+            // Строим график с количеством шагов
+            PlotGraph_Pow(processingSteps, numbers);
+
             return numbers;
         }
 
-        private static double Power_quickPowClassic(double baseValue, double exponent)
+        public override void Run(int[] numbers)
+        {
+            // Эту хуету не трогать
+        }
+
+        private static int Power_quickPowClassic(int baseValue, int exponent)
         {
             double f = 1; // Изначальный результат
             double c = baseValue; // Текущая степень основания
@@ -931,7 +1260,7 @@ namespace Stend
 
             while (k > 0)
             {
-                times++;
+
                 times++;
                 if (k % 2 != 0) // Если степень нечетная
                 {
@@ -949,139 +1278,204 @@ namespace Stend
                 }
             }
 
-            return (double)times;
+            return times;
         }
     }
 
     public class BucketSort : Algorithm
     {
-        public BucketSort(int repeat, ref Chart ch)
+        public BucketSort(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Bucket Sort";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
             // Эту хуету не трогать
             return numbers;
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
-            List<double[]> avg_times = new List<double[]>();
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
-                {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    bucketsort(array[i]);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    tmp += avg_times[i][j];
-                }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            Times = processingTimes;
-            PlotGraph();
-            return processingTimes;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        int[] test = bucketsort(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds;
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
 
-        public static void bucketsort(double[] input) 
+        public static int[] bucketsort(int[] array)
         {
-            int n = input.Length / 1000;  // Используем длину массива для количества корзин
-            List<float>[] buckets = new List<float>[n];
-
-            for (int i = 0; i < n; ++i)
-                buckets[i] = new List<float>();
-
-            // Распределение элементов по корзинам
-            foreach (float num in input)
+            if (array == null || array.Length <= 1)
             {
-                int bucketIndex = (int)(n * num);
-                // out of index error 
-                // TODO: FIX IT!!!!!
-                buckets[bucketIndex].Add(num);
+                return array;
             }
-
-            // Сортировка элементов в каждой корзине и их сборка
-            int index = 0;
-            for (int i = 0; i < n; ++i)
+            int maxValue = array[0];
+            int minValue = array[0];
+            for (int i = 1; i < array.Length; i++)
             {
-                buckets[i].Sort();
-                foreach (float num in buckets[i])
+                if (array[i] > maxValue)
                 {
-                    input[index++] = num;
+                    maxValue = array[i];
+                }
+                if (array[i] < minValue)
+                {
+                    minValue = array[i];
                 }
             }
+            LinkedList<int>[] bucket = new LinkedList<int>[maxValue - minValue + 1];
+            for (int i = 0; i < array.Length; i++)
+            {
+                if (bucket[array[i] - minValue] == null)
+                {
+                    bucket[array[i] - minValue] = new LinkedList<int>();
+                }
+                bucket[array[i] - minValue].AddLast(array[i]);
+            }
+            var index = 0;
+
+            for (int i = 0; i < bucket.Length; i++)
+            {
+                if (bucket[i] != null)
+                {
+                    LinkedListNode<int> node = bucket[i].First;
+                    while (node != null)
+                    {
+                        array[index] = node.Value;
+                        node = node.Next;
+                        index++;
+                    }
+                }
+            }
+            return array;
         }
     }
 
     public class SelectionSort : Algorithm
     {
-        public SelectionSort(int repeat, ref Chart ch)
+        public SelectionSort(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Selection Sort";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
         }
 
-        public override double[] Run(double[] numbers, int exponent)
+        public override int[] Run(int[] numbers, int exponent)
         {
             // Эту хуету не трогать
             return numbers;
         }
 
-        public override double[] Run(double[] numbers)
+        public override async void Run(int[] numbers)
         {
             var len = numbers.Length;
-            List<double[]> array = SplitArray(numbers, 10000);
-            List<double[]> avg_times = new List<double[]>();
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
             {
-                double[] times_for_avg = new double[array.Count];
-                for (int i = 0; i < array.Count; i++)
-                {
-                    Stopwatch stopwatch = Stopwatch.StartNew();
-                    selection(array[i]);
-                    times_for_avg[i] = (double)stopwatch.ElapsedMilliseconds / 1000f;
-                    stopwatch.Stop();
-                }
-                avg_times.Add(times_for_avg);
-                array = SplitArray(numbers, 10000);
-            }
-            double[] processingTimes = new double[array.Count];
-            for (int j = 0; j < array.Count; j++)
-            {
-                double tmp = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    tmp += avg_times[i][j];
-                }
-                double avg = tmp / repeats;
-                processingTimes[j] = avg;
-            }
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
             Arr = array;
-            Times = processingTimes;
-            PlotGraph();
-            return processingTimes;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        selection(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
         }
 
-        public static void selection(double[] input)
+        public static void selection(int[] input)
         {
             // Реализация сортировки выбором
             for (int i = 0; i < input.Length - 1; i++)
@@ -1095,7 +1489,7 @@ namespace Stend
                     }
                 }
                 // Обмен элементов
-                double temp = input[minIndex];
+                int temp = input[minIndex];
                 input[minIndex] = input[i];
                 input[i] = temp;
             }
