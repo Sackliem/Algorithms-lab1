@@ -48,6 +48,7 @@
             "StartQuickSort",
             "Sum",
             "EvaluatePolynomiaNaive",
+            "EvaluatePolynomiaHorner",
             "EvaluateConstantFunction",
             "CalculateProduct",
             "Timsort",

@@ -24,6 +24,8 @@ namespace Stend
         private int size;
         private int block_size;
         private Algorithm selectedAlgorithm;
+        private bool isDragging = false;
+        private PointF lastMousePosition;
         public Form2(Form1 mainForm)
         {
             InitializeComponent();
@@ -52,6 +54,9 @@ namespace Stend
             }
             graph.ChartAreas[0].AxisX.ScaleView.Zoomable = true;
             graph.ChartAreas[0].AxisY.ScaleView.Zoomable = true;
+            graph.MouseDown += chart_MouseDown;
+            graph.MouseMove += chart_MouseMove;
+            graph.MouseUp += chart_MouseUp;
             graph.MouseWheel += graph_MouseWheel;
         }
 
@@ -72,6 +77,40 @@ namespace Stend
             
         }
 
+        private void chart_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isDragging = true;
+                lastMousePosition = e.Location;
+            }
+        }
+
+        private void chart_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                var xAxis = graph.ChartAreas[0].AxisX;
+                var yAxis = graph.ChartAreas[0].AxisY;
+
+                var deltaX = xAxis.PixelPositionToValue(lastMousePosition.X) - xAxis.PixelPositionToValue(e.Location.X);
+                var deltaY = yAxis.PixelPositionToValue(lastMousePosition.Y) - yAxis.PixelPositionToValue(e.Location.Y);
+
+                xAxis.ScaleView.Scroll(xAxis.ScaleView.Position + deltaX);
+                yAxis.ScaleView.Scroll(yAxis.ScaleView.Position + deltaY);
+
+                lastMousePosition = e.Location;
+            }
+        }
+
+        private void chart_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isDragging = false;
+            }
+        }
+
         private void graph_MouseWheel(object sender, MouseEventArgs e)
         {
             var chart = (Chart)sender;
@@ -81,8 +120,20 @@ namespace Stend
             {
                 if (e.Delta < 0) // Scrolled down.
                 {
-                    xAxis.ScaleView.ZoomReset();
-                    yAxis.ScaleView.ZoomReset();
+                    var xMin = xAxis.ScaleView.ViewMinimum;
+                    var xMax = xAxis.ScaleView.ViewMaximum;
+                    var yMin = yAxis.ScaleView.ViewMinimum;
+                    var yMax = yAxis.ScaleView.ViewMaximum;
+
+                    // Вычисляем новые границы для уменьшения масштаба
+                    var posXStart = xMin - (xMax - xMin) / 4;
+                    var posXFinish = xMax + (xMax - xMin) / 4;
+                    var posYStart = yMin - (yMax - yMin) / 4;
+                    var posYFinish = yMax + (yMax - yMin) / 4;
+
+                    // Применяем новые границы
+                    xAxis.ScaleView.Zoom(posXStart, posXFinish);
+                    yAxis.ScaleView.Zoom(posYStart, posYFinish);
                 }
                 else if (e.Delta > 0) // Scrolled up.
                 {
@@ -103,6 +154,7 @@ namespace Stend
 
         private void button1_Click(object sender, EventArgs e)
         {
+            button1.Enabled = false;
 
             /*
             seconds
@@ -114,7 +166,7 @@ namespace Stend
             switch (time_select)
             {
                 case "seconds":
-                    time_formule = 1/1000;
+                    time_formule = 1/1000f;
                     break;
                 case "milliseconds":
                     time_formule = 1;
@@ -130,6 +182,7 @@ namespace Stend
             }
             Random random = new Random();
             int lenght = size;
+            int[] arr_pow = new int[lenght];
             int[] arr = new int[lenght];
             switch (algorithm_select)
             {
@@ -151,6 +204,11 @@ namespace Stend
                 case "EvaluatePolynomiaNaive":
                     arr = random_int(lenght);
                     selectedAlgorithm = new PolynomialEvaluator(select_replay, block_size, time_select, time_formule, ref graph, ref progressBar1);
+                    selectedAlgorithm.Run(arr);
+                    break;
+                case "EvaluatePolynomiaHorner":
+                    arr = random_int(lenght);
+                    selectedAlgorithm = new PolynomialEvaluatorHorner(select_replay, block_size, time_select, time_formule, ref graph, ref progressBar1);
                     selectedAlgorithm.Run(arr);
                     break;
                 case "EvaluateConstantFunction":
@@ -190,45 +248,28 @@ namespace Stend
                     selectedAlgorithm.Run(arr);
                     break;
                 case "PowerNative":
-                    arr = random_int(lenght);
+                    arr_pow = Enumerable.Range(0, lenght).ToArray();
                     selectedAlgorithm = new PowerNative(select_replay, ref graph, ref progressBar1);
-                    for (int i = 0; i < arr.Length; i++)
-                    {
-                        arr[i] = random.Next(1, 10);
-                    }
-                    selectedAlgorithm.Run(arr, 5);
+                    selectedAlgorithm.Run(arr_pow);
                     break;
                 case "PowerRecursive":
-                    arr = random_int(lenght);
+                    arr_pow = Enumerable.Range(0, lenght).ToArray();
                     selectedAlgorithm = new PowerRecursive(select_replay, ref graph, ref progressBar1);
-                    for (int i = 0; i < arr.Length; i++)
-                    {
-                        arr[i] = random.Next(1, 10);
-                    }
-                    selectedAlgorithm.Run(arr, 5);
+                    selectedAlgorithm.Run(arr_pow);
                     break;
                 case "PowerQuickPow":
-                    arr = random_int(lenght);
+                    arr_pow = Enumerable.Range(0, lenght).ToArray();
                     selectedAlgorithm = new PowerQuickPow(select_replay, ref graph, ref progressBar1);
-                    for (int i = 0; i < arr.Length; i++)
-                    {
-                        arr[i] = random.Next(1, 10);
-                    }
-                    selectedAlgorithm.Run(arr, 5);
+                    selectedAlgorithm.Run(arr_pow);
                     break;
                 case "PowerQuickPowClassic":
-                    arr = random_int(lenght);
+                    arr_pow = Enumerable.Range(0, lenght).ToArray();
                     selectedAlgorithm = new PowerQuickPowClassic(select_replay, ref graph, ref progressBar1);
-                    for (int i = 0; i < arr.Length; i++)
-                    {
-                        arr[i] = random.Next(1, 10);
-                    }
-                    selectedAlgorithm.Run(arr, 5);
+                    selectedAlgorithm.Run(arr_pow);
                     break;
                 default:
                     break;
             }
-
         }
 
         private void Form2_Load(object sender, EventArgs e)

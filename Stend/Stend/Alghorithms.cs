@@ -90,7 +90,15 @@ namespace Stend
             Title tt = new Title();
             tt.Name = name;
             tt.Text = name;
-            chart.Titles.Add(tt);
+            try
+            {
+                chart.Titles.Add(tt);
+            }
+            catch
+            {
+
+            }
+            
             //chart.Series[0].Label = name;
             chart.Series[0].Name = name;
             chart.ChartAreas[0].AxisX.Title = "Lenght";
@@ -106,6 +114,22 @@ namespace Stend
 
         public void PlotGraph_Pow(int[] times, int[] numbers)
         {
+            Title tt = new Title();
+            tt.Name = name;
+            tt.Text = name;
+            try
+            {
+                chart.Titles.Add(tt);
+            }
+            catch
+            {
+
+            }
+
+            //chart.Series[0].Label = name;
+            chart.Series[0].Name = name;
+            chart.ChartAreas[0].AxisX.Title = "Exponents^numbers";
+            chart.ChartAreas[0].AxisY.Title = "Steps";
             // надо переписать под возведение в степень
             chart.Series[0].Points.Clear();
             for (var i = 0; i != numbers.Length; i++)
@@ -157,7 +181,7 @@ namespace Stend
 
             await Task.Run(() =>
             {
-                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                Parallel.For(0, repeats, avg_i =>
                 {
                     double[] times_for_avg = new double[array.Count];
                     for (int i = 0; i < array.Count; i++)
@@ -171,7 +195,7 @@ namespace Stend
                         progressBar.Invoke((Action)(() => progressBar.PerformStep()));
                     }
                     avg_times.Add(times_for_avg);
-                }
+                });
 
                 // Вычисляем среднее время для каждого подмассива
                 double[] processingTimes = new double[array.Count];
@@ -275,16 +299,15 @@ namespace Stend
             var len = numbers.Length;
             List<int[]> array = SplitArray(numbers, block_size);
 
-            // Настраиваем прогресс бар
             progressBar.Invoke((Action)(() =>
             {
                 progressBar.Visible = true;
-                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count; 
                 progressBar.Value = 0;
             }));
 
             Arr = array;
-            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+            List<double[]> avg_times = new List<double[]>();
 
             await Task.Run(() =>
             {
@@ -454,7 +477,7 @@ namespace Stend
                     for (int i = 0; i < array.Count; i++)
                     {
                         Stopwatch stopwatch = Stopwatch.StartNew();
-                        Polynomial(array[i]);
+                        NaiveEvaluation(array[i]);
                         stopwatch.Stop();
                         times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
                         // Обновляем прогресс бар после каждой итерации сортировки массива
@@ -484,22 +507,112 @@ namespace Stend
             });
         }
 
-        public static void Polynomial(int[] coefficients)
+        public static double NaiveEvaluation(int[] coefficients)
         {
             double result = 0;
-            double x = 1.5;  // Примерное значение x
             int n = coefficients.Length;
+            double x = 1.5;
+
+            // Прямое вычисление: P(x) = v1 + v2*x + v3*x^2 + ... + vn*x^(n-1)
             for (int i = 0; i < n; i++)
             {
-                double term = coefficients[i];
-                for (int j = 0; j < i; j++)
-                {
-                    term *= x;
-                }
-                result += term;
+                result += coefficients[i] * Math.Pow(x, i);  // Вычисляем каждый член
             }
+
+            return result;
         }
     }
+
+    public class PolynomialEvaluatorHorner : Algorithm
+    {
+
+        public PolynomialEvaluatorHorner(int repeat, int size_block, string time, double times, ref Chart ch, ref ProgressBar progressBar1)
+        {
+            name = "Polynom";
+            times_formule = times;
+            block_size = size_block;
+            time_select = time;
+            progressBar = progressBar1;
+            repeats = repeat;
+            chart = ch;
+        }
+
+        public override int[] Run(int[] numbers, int exponent)
+        {
+            // Эту хуе*у не трогать
+            return numbers;
+        }
+
+        public override async void Run(int[] numbers)
+        {
+            var len = numbers.Length;
+            List<int[]> array = SplitArray(numbers, block_size);
+
+            // Настраиваем прогресс бар
+            progressBar.Invoke((Action)(() =>
+            {
+                progressBar.Visible = true;
+                progressBar.Maximum = (array.Count * repeats) * 8 + array.Count;  // Общий прогресс — количество подмассивов * количество повторений
+                progressBar.Value = 0;
+            }));
+
+            Arr = array;
+            List<double[]> avg_times = new List<double[]>(); // Храним время всех повторений
+
+            await Task.Run(() =>
+            {
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
+                {
+                    double[] times_for_avg = new double[array.Count];
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        Stopwatch stopwatch = Stopwatch.StartNew();
+                        HornerEvaluation(array[i]);
+                        stopwatch.Stop();
+                        times_for_avg[i] = (double)stopwatch.Elapsed.TotalMilliseconds * times_formule;
+                        // Обновляем прогресс бар после каждой итерации сортировки массива
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    }
+                    avg_times.Add(times_for_avg);
+                }
+
+                // Вычисляем среднее время для каждого подмассива
+                double[] processingTimes = new double[array.Count];
+                for (int j = 0; j < array.Count; j++)
+                {
+                    double tmp = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        tmp += avg_times[i][j];
+                    }
+
+                    double avg = tmp / repeats;
+                    processingTimes[j] = avg;
+                }
+
+                Times = processingTimes;
+
+                // Отображаем график в основном потоке
+                chart.Invoke((Action)(() => PlotGraph()));
+            });
+        }
+
+        public static double HornerEvaluation(int[] coefficients)
+        {
+            double result = 0;
+            int n = coefficients.Length;
+            double x = 1.5;
+
+            // Метод Горнера: P(x) = v1 + x(v2 + x(v3 + ...))
+            for (int i = n - 1; i >= 0; i--)
+            {
+                result = coefficients[i] + x * result;
+            }
+
+            return result;
+        }
+    }
+
 
     public class ConstantFunction : Algorithm
     {
@@ -928,6 +1041,7 @@ namespace Stend
 
         public PowerNative(int repeat, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Power Native";
             progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
@@ -945,11 +1059,7 @@ namespace Stend
             return times;
         }
 
-        public override void Run(int[] input)
-        {
-            // Эту хуе*у не трогать
-        }
-        public override int[] Run(int[] numbers, int exponent)
+        public override async void Run(int[] numbers)
         {
             var len = numbers.Length;
             Array.Sort(numbers);
@@ -963,39 +1073,46 @@ namespace Stend
                 progressBar.Value = 0;
             }));
 
-            // Многопоточный расчет с использованием Parallel.For
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            await Task.Run(() =>
             {
-                int[] steps_for_avg = new int[numbers.Length];
 
-                Parallel.For(0, len, i =>
+                // Многопоточный расчет с использованием Parallel.For
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
                 {
-                    steps_for_avg[i] = power_naive(exponent, numbers[i]);  // Подсчет шагов для каждого числа
+                    int[] steps_for_avg = new int[numbers.Length];
 
-                    // Обновляем прогресс-бар после выполнения каждого элемента
-                    progressBar.Invoke((Action)(() => progressBar.PerformStep()));
-                });
+                    Parallel.For(0, len, i =>
+                    {
+                        steps_for_avg[i] = power_naive(numbers[i], numbers[i]);  // Подсчет шагов для каждого числа
 
-                avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
-            }
+                        // Обновляем прогресс-бар после выполнения каждого элемента
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    });
 
-            // Вычисляем среднее количество шагов для каждого числа
-            int[] processingSteps = new int[numbers.Length];
-            Parallel.For(0, len, j =>
-            {
-                int totalSteps = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    totalSteps += avg_steps[i][j];
+                    avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
                 }
 
-                int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
-                processingSteps[j] = avg;
+                // Вычисляем среднее количество шагов для каждого числа
+                int[] processingSteps = new int[numbers.Length];
+                Parallel.For(0, len, j =>
+                {
+                    int totalSteps = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        totalSteps += avg_steps[i][j];
+                    }
+
+                    int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
+                    processingSteps[j] = avg;
+                });
+                // Строим график с количеством шагов
+                chart.Invoke((Action)(() => PlotGraph_Pow(processingSteps, numbers)));
+
             });
+        }
 
-            // Строим график с количеством шагов
-            PlotGraph_Pow(processingSteps, numbers);
-
+        public override int[] Run(int[] numbers, int exponent)
+        {
             return numbers;
         }
 
@@ -1006,6 +1123,7 @@ namespace Stend
 
         public PowerRecursive(int repeat, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Power Recusive";
             progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
@@ -1022,6 +1140,12 @@ namespace Stend
 
         public override int[] Run(int[] numbers, int exponent)
         {
+
+            return numbers;
+        }
+
+        public override async void Run(int[] numbers)
+        {
             var len = numbers.Length;
             Array.Sort(numbers);
             List<int[]> avg_steps = new List<int[]>();  // Список для хранения количества шагов для каждого повторения
@@ -1034,55 +1158,54 @@ namespace Stend
                 progressBar.Value = 0;
             }));
 
-            // Многопоточный расчет с использованием Parallel.For
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            await Task.Run(() =>
             {
-                int[] steps_for_avg = new int[numbers.Length];
 
-                Parallel.For(0, len, i =>
+                // Многопоточный расчет с использованием Parallel.For
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
                 {
-                    int actions = 0;
-                    power_recursive(exponent, numbers[i], ref actions);  // Подсчет шагов для каждого числа
-                    steps_for_avg[i] = actions;
-                    actions = 0;
+                    int[] steps_for_avg = new int[numbers.Length];
 
-                    // Обновляем прогресс-бар после выполнения каждого элемента
-                    progressBar.Invoke((Action)(() => progressBar.PerformStep()));
-                });
+                    Parallel.For(0, len, i =>
+                    {
+                        int actions = 0;
+                        power_recursive(numbers[i], numbers[i], ref actions);  // Подсчет шагов для каждого числа
+                        steps_for_avg[i] = actions;
+                        actions = 0;
 
-                avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
-            }
+                        // Обновляем прогресс-бар после выполнения каждого элемента
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    });
 
-            // Вычисляем среднее количество шагов для каждого числа
-            int[] processingSteps = new int[numbers.Length];
-            for (int j = 0; j < numbers.Length; j++)
-            {
-                int totalSteps = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    totalSteps += avg_steps[i][j];
+                    avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
                 }
 
-                int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
-                processingSteps[j] = avg;
-            }
+                // Вычисляем среднее количество шагов для каждого числа
+                int[] processingSteps = new int[numbers.Length];
+                Parallel.For(0, len, j =>
+                {
+                    int totalSteps = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        totalSteps += avg_steps[i][j];
+                    }
 
-            // Строим график с количеством шагов
-            PlotGraph_Pow(processingSteps, numbers);
+                    int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
+                    processingSteps[j] = avg;
+                });
+                // Строим график с количеством шагов
+                chart.Invoke((Action)(() => PlotGraph_Pow(processingSteps, numbers)));
 
-            return numbers;
-        }
-
-        public override void Run(int[] input)
-        {
-            // Эту хуе*у не трогать
+            });
         }
     }
+
 
     public class PowerQuickPow : Algorithm
     {
         public PowerQuickPow(int repeat, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Power Quick Pow";
             progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
@@ -1096,7 +1219,6 @@ namespace Stend
             int times = 0;
 
             // Инициализация значения f в зависимости от четности k
-            times++;
             if (k % 2 == 1)
             {
                 times++;
@@ -1114,9 +1236,7 @@ namespace Stend
             while (k > 0)
             {
                 times++;
-                times++;
                 c = c * c; // Возведение текущей степени в квадрат
-                times++;
                 if (k % 2 == 1) // Если k нечётное
                 {
                     times++;
@@ -1131,6 +1251,13 @@ namespace Stend
 
         public override int[] Run(int[] numbers, int exponent)
         {
+            
+            return numbers;
+        }
+
+        public override async void Run(int[] numbers)
+        {
+            numbers = numbers.Distinct().ToArray();
             var len = numbers.Length;
             Array.Sort(numbers);
             List<int[]> avg_steps = new List<int[]>();  // Список для хранения количества шагов для каждого повторения
@@ -1143,45 +1270,42 @@ namespace Stend
                 progressBar.Value = 0;
             }));
 
-            // Многопоточный расчет с использованием Parallel.For
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            await Task.Run(() =>
             {
-                int[] steps_for_avg = new int[numbers.Length];
 
-                Parallel.For(0, len, i =>
+                // Многопоточный расчет с использованием Parallel.For
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
                 {
-                    steps_for_avg[i] = Power_quick_pow(exponent, numbers[i]);  // Подсчет шагов для каждого числа
+                    int[] steps_for_avg = new int[numbers.Length];
 
-                    // Обновляем прогресс-бар после выполнения каждого элемента
-                    progressBar.Invoke((Action)(() => progressBar.PerformStep()));
-                });
+                    Parallel.For(0, len, i =>
+                    {
+                        steps_for_avg[i] = Power_quick_pow(numbers[i], numbers[i]);  // Подсчет шагов для каждого числа
 
-                avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
-            }
+                        // Обновляем прогресс-бар после выполнения каждого элемента
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    });
 
-            // Вычисляем среднее количество шагов для каждого числа
-            int[] processingSteps = new int[numbers.Length];
-            Parallel.For(0, len, j =>
-            {
-                int totalSteps = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    totalSteps += avg_steps[i][j];
+                    avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
                 }
 
-                int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
-                processingSteps[j] = avg;
+                // Вычисляем среднее количество шагов для каждого числа
+                int[] processingSteps = new int[numbers.Length];
+                Parallel.For(0, len, j =>
+                {
+                    int totalSteps = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        totalSteps += avg_steps[i][j];
+                    }
+
+                    int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
+                    processingSteps[j] = avg;
+                });
+                // Строим график с количеством шагов
+                chart.Invoke((Action)(() => PlotGraph_Pow(processingSteps, numbers)));
+
             });
-
-            // Строим график с количеством шагов
-            PlotGraph_Pow(processingSteps, numbers);
-
-            return numbers;
-        }
-
-        public override void Run(int[] input)
-        {
-            // Эту хуе*у не трогать
         }
 
     }
@@ -1190,6 +1314,7 @@ namespace Stend
     {
         public PowerQuickPowClassic(int repeat, ref Chart ch, ref ProgressBar progressBar1)
         {
+            name = "Power Quick Pow Classic";
             progressBar = progressBar1;
             repeats = repeat;
             chart = ch;
@@ -1197,6 +1322,13 @@ namespace Stend
 
         public override int[] Run(int[] numbers, int exponent)
         {
+            
+            return numbers;
+        }
+
+        public override async void Run(int[] numbers)
+        {
+            numbers = numbers.Distinct().ToArray();
             var len = numbers.Length;
             Array.Sort(numbers);
             List<int[]> avg_steps = new List<int[]>();  // Список для хранения количества шагов для каждого повторения
@@ -1209,46 +1341,42 @@ namespace Stend
                 progressBar.Value = 0;
             }));
 
-            // Многопоточный расчет с использованием Parallel.For
-            for (int avg_i = 0; avg_i < repeats; avg_i++)
+            await Task.Run(() =>
             {
-                int[] steps_for_avg = new int[numbers.Length];
 
-                Parallel.For(0, len, i =>
+                // Многопоточный расчет с использованием Parallel.For
+                for (int avg_i = 0; avg_i < repeats; avg_i++)
                 {
-                    steps_for_avg[i] = Power_quickPowClassic(exponent, numbers[i]);  // Подсчет шагов для каждого числа
+                    int[] steps_for_avg = new int[numbers.Length];
 
-                    // Обновляем прогресс-бар после выполнения каждого элемента
-                    progressBar.Invoke((Action)(() => progressBar.PerformStep()));
-                });
+                    Parallel.For(0, len, i =>
+                    {
+                        steps_for_avg[i] = Power_quickPowClassic(numbers[i], numbers[i]);  // Подсчет шагов для каждого числа
 
-                avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
-            }
+                        // Обновляем прогресс-бар после выполнения каждого элемента
+                        progressBar.Invoke((Action)(() => progressBar.PerformStep()));
+                    });
 
-            // Вычисляем среднее количество шагов для каждого числа
-            int[] processingSteps = new int[numbers.Length];
-
-            Parallel.For(0, len, j =>
-            {
-                int totalSteps = 0;
-                for (int i = 0; i < repeats; i++)
-                {
-                    totalSteps += avg_steps[i][j];
+                    avg_steps.Add(steps_for_avg);  // Сохраняем количество шагов для текущего повторения
                 }
 
-                int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
-                processingSteps[j] = avg;
+                // Вычисляем среднее количество шагов для каждого числа
+                int[] processingSteps = new int[numbers.Length];
+                Parallel.For(0, len, j =>
+                {
+                    int totalSteps = 0;
+                    for (int i = 0; i < repeats; i++)
+                    {
+                        totalSteps += avg_steps[i][j];
+                    }
+
+                    int avg = totalSteps / repeats;  // Среднее количество шагов для текущего числа
+                    processingSteps[j] = avg;
+                });
+                // Строим график с количеством шагов
+                chart.Invoke((Action)(() => PlotGraph_Pow(processingSteps, numbers)));
+
             });
-
-            // Строим график с количеством шагов
-            PlotGraph_Pow(processingSteps, numbers);
-
-            return numbers;
-        }
-
-        public override void Run(int[] numbers)
-        {
-            // Эту хуету не трогать
         }
 
         private static int Power_quickPowClassic(int baseValue, int exponent)

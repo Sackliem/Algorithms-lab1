@@ -3,20 +3,24 @@
   "WorkspaceRootPath": "D:\\IIT\\algorithms\\dev\\Stend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|d:\\iit\\algorithms\\dev\\stend\\stend\\alghorithms.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\alghorithms.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|D:\\IIT\\algorithms\\dev\\Stend\\stend\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|D:\\IIT\\algorithms\\dev\\Stend\\stend\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|D:\\IIT\\algorithms\\dev\\Stend\\stend\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|D:\\IIT\\algorithms\\dev\\Stend\\stend\\form2.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\form2.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|D:\\IIT\\algorithms\\dev\\Stend\\stend\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|d:\\iit\\algorithms\\dev\\stend\\stend\\alghorithms.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\alghorithms.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|D:\\IIT\\algorithms\\dev\\Stend\\stend\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|D:\\IIT\\algorithms\\dev\\Stend\\stend\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
@@ -25,10 +29,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|D:\\IIT\\algorithms\\dev\\Stend\\stend\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\form2.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|D:\\IIT\\algorithms\\dev\\Stend\\stend\\form2.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C00ECCA6-E279-4DD1-877A-DC6E2B948595}|Stend\\Stend.csproj|solutionrelative:stend\\form2.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,17 +38,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "Alghorithms.cs",
               "DocumentMoniker": "D:\\IIT\\algorithms\\dev\\Stend\\Stend\\Alghorithms.cs",
               "RelativeDocumentMoniker": "Stend\\Alghorithms.cs",
               "ToolTip": "D:\\IIT\\algorithms\\dev\\Stend\\Stend\\Alghorithms.cs",
               "RelativeToolTip": "Stend\\Alghorithms.cs",
-              "ViewState": "AQIAAB4AAAAAAAAAAAAAAF4AAAAoAAAA",
+              "ViewState": "AQIAAN8BAAAAAAAAAAAwwBwCAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-10-01T16:20:14.456Z",
               "IsPinned": true,
@@ -62,14 +62,14 @@
               "RelativeDocumentMoniker": "Stend\\Form2.cs",
               "ToolTip": "D:\\IIT\\algorithms\\dev\\Stend\\Stend\\Form2.cs",
               "RelativeToolTip": "Stend\\Form2.cs",
-              "ViewState": "AQIAAKAAAAAAAAAAAAAcwLwAAACNAAAA",
+              "ViewState": "AQIAALYAAAAAAAAAAAAUwNAAAAAtAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-09-16T20:44:37.525Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "Form1.cs",
               "DocumentMoniker": "D:\\IIT\\algorithms\\dev\\Stend\\Stend\\Form1.cs",
               "RelativeDocumentMoniker": "Stend\\Form1.cs",
@@ -82,7 +82,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "App.config",
               "DocumentMoniker": "D:\\IIT\\algorithms\\dev\\Stend\\Stend\\App.config",
               "RelativeDocumentMoniker": "Stend\\App.config",
@@ -95,7 +95,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
               "Title": "Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "DocumentMoniker": "D:\\IIT\\algorithms\\dev\\Stend\\Stend\\Form1.cs",
               "RelativeDocumentMoniker": "Stend\\Form1.cs",
@@ -107,7 +107,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 2,
               "Title": "Form2.Designer.cs",
               "DocumentMoniker": "D:\\IIT\\algorithms\\dev\\Stend\\Stend\\Form2.Designer.cs",
               "RelativeDocumentMoniker": "Stend\\Form2.Designer.cs",
@@ -120,7 +120,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "Form2.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "DocumentMoniker": "D:\\IIT\\algorithms\\dev\\Stend\\Stend\\Form2.cs",
               "RelativeDocumentMoniker": "Stend\\Form2.cs",
